@@ -8,43 +8,43 @@ class AppTheme {
 
   static final light = ThemeData(
     useMaterial3: false,
-    colorScheme: const ColorScheme.light(
-      primary: LightColors.labelPrimary,
-      secondary: LightColors.labelSecondary,
-      tertiary: LightColors.labelTertiary,
+    fontFamily: "Roboto",
+    scaffoldBackgroundColor: LightColors.backPrimary,
+    appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,
+          statusBarBrightness: Brightness.dark),
+      backgroundColor: LightColors.backPrimary,
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: LightColors.blue,
     ),
-    scaffoldBackgroundColor: LightColors.backPrimary,
-    appBarTheme: const AppBarTheme(
-      systemOverlayStyle: SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.dark,
-      ),
-      backgroundColor: LightColors.backPrimary,
+    colorScheme: const ColorScheme.light(
+      primary: LightColors.labelPrimary,
+      secondary: LightColors.labelSecondary,
+      tertiary: LightColors.labelTertiary,
+      background: LightColors.backPrimary,
+      secondaryContainer: LightColors.backSecondary,
     ),
     textTheme: const TextTheme(
       titleLarge: TextStyle(
         fontSize: 32,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.bold,
       ),
       titleMedium: TextStyle(
         fontSize: 20,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.bold,
       ),
       labelMedium: TextStyle(
         fontSize: 16,
-        fontWeight: FontWeight.w500,
+        fontWeight: FontWeight.bold,
       ),
       bodyMedium: TextStyle(
         fontSize: 16,
-        fontWeight: FontWeight.w400,
       ),
       bodySmall: TextStyle(
         fontSize: 14,
-        fontWeight: FontWeight.w400,
         color: LightColors.labelTertiary,
       ),
     ),
@@ -56,6 +56,9 @@ class AppTheme {
         grey: LightColors.grey,
         lightGrey: LightColors.lightGrey,
         white: LightColors.white,
+        separator: LightColors.supportSeparator,
+        overlay: LightColors.supportOverlay,
+        disable: LightColors.labelDisable,
       )
     ],
   );

@@ -7,14 +7,21 @@ class CustomColors extends ThemeExtension<CustomColors> {
   final Color grey;
   final Color lightGrey;
   final Color white;
+  final Color separator;
+  final Color overlay;
+  final Color disable;
 
-  CustomColors(
-      {required this.red,
-      required this.green,
-      required this.blue,
-      required this.grey,
-      required this.lightGrey,
-      required this.white});
+  CustomColors({
+    required this.red,
+    required this.green,
+    required this.blue,
+    required this.grey,
+    required this.lightGrey,
+    required this.white,
+    required this.separator,
+    required this.overlay,
+    required this.disable,
+  });
 
   @override
   CustomColors copyWith({
@@ -24,6 +31,9 @@ class CustomColors extends ThemeExtension<CustomColors> {
     Color? grey,
     Color? lightGrey,
     Color? white,
+    Color? separator,
+    Color? overlay,
+    Color? disable,
   }) {
     return CustomColors(
       red: red ?? this.red,
@@ -32,6 +42,9 @@ class CustomColors extends ThemeExtension<CustomColors> {
       grey: grey ?? this.grey,
       lightGrey: lightGrey ?? this.lightGrey,
       white: white ?? this.white,
+      separator: separator ?? this.separator,
+      overlay: overlay ?? this.overlay,
+      disable: disable ?? this.disable,
     );
   }
 
@@ -45,6 +58,9 @@ class CustomColors extends ThemeExtension<CustomColors> {
       grey: Color.lerp(grey, other.grey, t)!,
       lightGrey: Color.lerp(lightGrey, other.lightGrey, t)!,
       white: Color.lerp(white, other.white, t)!,
+      separator: Color.lerp(separator, other.separator, t)!,
+      overlay: Color.lerp(overlay, other.overlay, t)!,
+      disable: Color.lerp(disable, other.disable, t)!,
     );
   }
 }

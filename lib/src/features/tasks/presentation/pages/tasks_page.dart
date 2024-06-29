@@ -5,88 +5,28 @@ import '../widgets/widgets.dart';
 import '/src/core/utils/utils.dart';
 import 'pages.dart';
 
-class TodoListPage extends StatefulWidget {
+class TodoListPage extends StatelessWidget {
   const TodoListPage({super.key});
 
   @override
-  State<TodoListPage> createState() => _TodoListPageState();
-}
-
-class _TodoListPageState extends State<TodoListPage> {
-  bool isVisible = false;
-
-  @override
   Widget build(BuildContext context) {
-    final tasks = <Task>[];
+    final tasks = <Task>[
+      Task(id: "1", text: "Пресс качат", importance: TaskImportance.basic, done: true, ),
+      Task(id: "2", text: "Бегит", importance: TaskImportance.low, done: false),
+      Task(id: "3", text: "Анжуманя", importance: TaskImportance.important, done: false),
+
+    ];
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            flexibleSpace: FlexibleSpaceBar(
-              titlePadding: const EdgeInsets.only(left: 30, bottom: 10),
-              title: Text("Мои Дела", style: context.textTheme.titleLarge),
-            ),
-            expandedHeight: 148,
+          SliverPersistentHeader(
             pinned: true,
-            floating: false,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 18.0),
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      isVisible = !isVisible;
-                    });
-                  },
-                  icon: Icon(
-                    isVisible ? Icons.visibility : Icons.visibility_off,
-                    color: context.customColors.blue,
-                  ),
-                ),
-              ),
-            ],
+            floating: true,
+            delegate: HeaderDelegate(),
           ),
           SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: context.colorScheme.background,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    ListView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemBuilder: (context, index) {
-                        return TaskItem(task: tasks[index]);
-                      },
-                      itemCount: tasks.length,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 40.0),
-                      child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const TaskFormPage(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          "Новое",
-                          style: context.textTheme.bodyMedium!
-                              .copyWith(color: context.colorScheme.tertiary),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            child: TaskList(
+              tasks: tasks,
             ),
           ),
         ],
@@ -101,7 +41,10 @@ class _TodoListPageState extends State<TodoListPage> {
           );
         },
         shape: const CircleBorder(),
-        child: Icon(Icons.add, color: context.customColors.white),
+        child: Icon(
+          Icons.add,
+          color: context.customColors.white,
+        ),
       ),
     );
   }
