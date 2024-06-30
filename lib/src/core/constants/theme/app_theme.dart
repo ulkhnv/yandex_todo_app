@@ -62,4 +62,61 @@ class AppTheme {
       )
     ],
   );
+
+  static final dark = ThemeData(
+    useMaterial3: false,
+    fontFamily: "Roboto",
+    scaffoldBackgroundColor: DarkColors.backPrimary,
+    appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.light),
+      backgroundColor: DarkColors.backPrimary,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: DarkColors.blue,
+    ),
+    colorScheme: const ColorScheme.dark(
+      primary: DarkColors.labelPrimary,
+      secondary: DarkColors.labelSecondary,
+      tertiary: DarkColors.labelTertiary,
+      background: DarkColors.backPrimary,
+      secondaryContainer: DarkColors.backSecondary,
+    ),
+    textTheme: const TextTheme(
+      titleLarge: TextStyle(
+        fontSize: 32,
+        fontWeight: FontWeight.bold,
+      ),
+      titleMedium: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+      labelMedium: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 16,
+      ),
+      bodySmall: TextStyle(
+        fontSize: 14,
+        color: DarkColors.labelTertiary,
+      ),
+    ),
+    extensions: [
+      CustomColors(
+        red: DarkColors.red,
+        green: DarkColors.green,
+        blue: DarkColors.blue,
+        grey: DarkColors.grey,
+        lightGrey: DarkColors.lightGrey,
+        white: DarkColors.white,
+        separator: DarkColors.supportSeparator,
+        overlay: DarkColors.supportOverlay,
+        disable: DarkColors.labelDisable,
+      )
+    ],
+  );
 }

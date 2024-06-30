@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:yandex_todo_app/src/features/tasks/domain/entities/task.dart';
 
-import '../../domain/entities/entities.dart';
+import '../../data/models/models.dart';
 import '/src/core/utils/utils.dart';
 
 class TaskFormPage extends StatefulWidget {
@@ -69,7 +68,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
           child: TextButton(
             onPressed: _saveTask,
             child: Text(
-              "Сохранить",
+              context.localizations.save,
               style: context.textTheme.labelMedium!
                   .copyWith(color: context.customColors.blue),
             ),
@@ -93,7 +92,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
           style: context.textTheme.bodyMedium,
           controller: textEditingController,
           decoration: InputDecoration(
-            hintText: "Что надо сделать...",
+            hintText: context.localizations.formHintText,
             hintStyle: context.textTheme.bodyMedium!
                 .copyWith(color: context.colorScheme.tertiary),
             enabledBorder: OutlineInputBorder(
@@ -120,11 +119,11 @@ class _TaskFormPageState extends State<TaskFormPage> {
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(
-            "Важность",
+            context.localizations.importanceTitle,
             style: context.textTheme.bodyMedium,
           ),
           subtitle: Text(
-            _selectedImportance.name,
+            context.localizations.importance(_selectedImportance.name),
             style: context.textTheme.bodySmall,
           ),
         ),
@@ -137,7 +136,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
             .map((importance) => PopupMenuItem<TaskImportance>(
                   value: importance,
                   child: Text(
-                    importance.name,
+                    context.localizations.importance(importance.name),
                     style: context.textTheme.bodyMedium!.copyWith(
                       color: importance == TaskImportance.important
                           ? context.customColors.red
@@ -156,7 +155,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
       child: SwitchListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(
-          "Сделать до",
+          context.localizations.deadlineTitle,
           style: context.textTheme.bodyMedium,
         ),
         subtitle: _buildFormatedDate(context),
@@ -169,6 +168,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
           if (newValue) {
             final selectedDate = await showDatePicker(
               context: context,
+              locale: const Locale("ru"),
               initialDate: DateTime.now(),
               firstDate: DateTime(1960),
               lastDate: DateTime(2100),
@@ -204,7 +204,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
           ),
         ),
         Text(
-          "Удалить",
+          context.localizations.delete,
           style: context.textTheme.bodyMedium!.copyWith(
             color: widget.task == null
                 ? context.customColors.disable

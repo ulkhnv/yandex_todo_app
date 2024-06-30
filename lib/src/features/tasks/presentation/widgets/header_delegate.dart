@@ -9,7 +9,6 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double shift = min(1, shrinkOffset / (maxExtent - minExtent));
-
     return Material(
       elevation: shift < 0.6 ? 0.1 : 4 * shift,
       child: Container(
@@ -20,7 +19,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
               left: 60 - 44 * shift,
               top: 94 - 54 * shift,
               child: Text(
-                "Мои дела",
+               context.localizations.taskTitle,
                 style: context.textTheme.titleLarge!.copyWith(
                   fontSize: 38 - 14 * shift,
                 ),
@@ -32,7 +31,7 @@ class HeaderDelegate extends SliverPersistentHeaderDelegate {
               child: Opacity(
                 opacity: shift < 0.6 ? 1 - shift : 0,
                 child: Text(
-                  "Выполнено — 5",
+                  context.localizations.taskSubtitle(0),
                   style: context.textTheme.bodyMedium!
                       .copyWith(color: context.colorScheme.tertiary),
                 ),

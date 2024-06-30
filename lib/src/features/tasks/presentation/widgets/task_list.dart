@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/entities.dart';
+import '../../data/models/models.dart';
 import '../pages/pages.dart';
 import '/src/core/utils/utils.dart';
 import 'widgets.dart';
@@ -46,7 +46,7 @@ class TaskList extends StatelessWidget {
                   );
                 },
                 child: Text(
-                  "Новое",
+                  context.localizations.newTask,
                   style: context.textTheme.bodyMedium!
                       .copyWith(color: context.colorScheme.tertiary),
                 ),

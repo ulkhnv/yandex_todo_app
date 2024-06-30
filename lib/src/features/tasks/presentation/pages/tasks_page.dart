@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/entities.dart';
+import '../../providers/task_provider.dart';
 import '../widgets/widgets.dart';
 import '/src/core/utils/utils.dart';
 import 'pages.dart';
 
-class TodoListPage extends StatelessWidget {
+class TodoListPage extends ConsumerWidget {
   const TodoListPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final tasks = <Task>[
-      Task(id: "1", text: "Пресс качат", importance: TaskImportance.basic, done: true, ),
-      Task(id: "2", text: "Бегит", importance: TaskImportance.low, done: false),
-      Task(id: "3", text: "Анжуманя", importance: TaskImportance.important, done: false),
-
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tasksAsyncValue = ref.watch(tasksProvider);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -25,9 +21,17 @@ class TodoListPage extends StatelessWidget {
             delegate: HeaderDelegate(),
           ),
           SliverToBoxAdapter(
-            child: TaskList(
-              tasks: tasks,
-            ),
+            child: tasksAsyncValue.when(
+                data: (tasks) => TaskList(
+                      tasks: tasks,
+                    ),
+                loading: () =>  const Center(child: CircularProgressIndicator()),
+                error: (err, stack) {
+                  return Center(
+                      child: Text(
+                    'Error: $stack',
+                  ));
+                }),
           ),
         ],
       ),
