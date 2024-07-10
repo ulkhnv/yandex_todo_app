@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/datasources/datasources.dart';
-import '../data/models/models.dart';
 import '../data/repositories/repositories.dart';
+import 'providers.dart';
 
 final dioProvider = Provider<Dio>((ref) {
   return Dio();
@@ -39,7 +39,7 @@ final taskRepositoryProvider = Provider<TaskRepository>((ref) {
   );
 });
 
-final tasksProvider = FutureProvider<List<Task>>((ref) {
+final taskProvider = StateNotifierProvider<TaskNotifier, TaskState>((ref) {
   final repository = ref.watch(taskRepositoryProvider);
-  return repository.getTasks();
+  return TaskNotifier(repository);
 });

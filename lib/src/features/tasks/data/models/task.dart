@@ -83,7 +83,5 @@ class Task {
       'changed_at': changedAt.millisecondsSinceEpoch,
       'last_updated_by': lastUpdatedBy,
     };
-
-
   }
 }

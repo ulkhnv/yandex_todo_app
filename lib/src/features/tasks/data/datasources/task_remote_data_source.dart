@@ -2,10 +2,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import '../models/models.dart';
+import '../models/task_response.dart';
 
 class TaskRemoteDataSource {
   final Dio _dio;
-  final String baseUrl = "https://beta.mrdekk.ru/todo";
+  final String baseUrl = "https://beta.mrdekk.ru/todo/list";
   final Map<String, String> headers = {
     "Content-Type": "application/json",
     "Authorization": dotenv.env['AUTHORIZATION']!,
@@ -13,16 +14,17 @@ class TaskRemoteDataSource {
 
   TaskRemoteDataSource(this._dio);
 
-  Future<List<Task>> getTasks() async {
+  Future<TaskResponse> getTasks() async {
     try {
       final response = await _dio.get(
-        '$baseUrl/list',
+        baseUrl,
         options: Options(headers: headers),
       );
       final List<dynamic> jsonTasks = response.data['list'];
       final tasks =
           jsonTasks.map((taskJson) => Task.fromJson(taskJson)).toList();
-      return tasks;
+      final revision = response.data['revision'];
+      return TaskResponse(tasks: tasks, revision: revision);
     } catch (e) {
       throw Exception('Failed to load tasks: $e');
     }
@@ -31,7 +33,7 @@ class TaskRemoteDataSource {
   Future<Task> getTask(String id) async {
     try {
       final response = await _dio.get(
-        '$baseUrl/list/$id',
+        '$baseUrl/$id',
         options: Options(headers: headers),
       );
       final task = Task.fromJson(response.data['element']);
@@ -44,7 +46,7 @@ class TaskRemoteDataSource {
   Future<void> patch(List<Task> tasks, int revision) async {
     try {
       await _dio.patch(
-        '$baseUrl/list/',
+        baseUrl,
         data: tasks.map((task) => task.toJson()).toList(),
         options: Options(
           headers: {
@@ -61,8 +63,10 @@ class TaskRemoteDataSource {
   Future<void> saveTask(Task task, int revision) async {
     try {
       await _dio.post(
-        '$baseUrl/list/',
-        data: task.toJson(),
+        baseUrl,
+        data: {
+          'element': task.toJson(),
+        },
         options: Options(
           headers: {
             ...headers,
@@ -78,8 +82,10 @@ class TaskRemoteDataSource {
   Future<Task> updateTask(Task task, int revision) async {
     try {
       final response = await _dio.put(
-        '$baseUrl/list/${task.id}',
-        data: task.toJson(),
+        '$baseUrl/${task.id}',
+        data: {
+          'element': task.toJson(),
+        },
         options: Options(
           headers: {
             ...headers,
@@ -97,7 +103,7 @@ class TaskRemoteDataSource {
   Future<Task> deleteTask(String id, int revision) async {
     try {
       final response = await _dio.delete(
-        '$baseUrl/list/$id',
+        '$baseUrl/$id',
         options: Options(
           headers: {
             ...headers,

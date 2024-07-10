@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../data/models/models.dart';
+import '../../providers/providers.dart';
 import '/src/core/utils/utils.dart';
 
-class TaskFormPage extends StatefulWidget {
+class TaskFormPage extends ConsumerStatefulWidget {
   final Task? task;
 
   const TaskFormPage({super.key, this.task});
 
   @override
-  State<TaskFormPage> createState() => _TaskFormPageState();
+  ConsumerState<TaskFormPage> createState() => _TaskFormPageState();
 }
 
-class _TaskFormPageState extends State<TaskFormPage> {
+class _TaskFormPageState extends ConsumerState<TaskFormPage> {
+  late TaskNotifier notifier;
   final textEditingController = TextEditingController();
   TaskImportance _selectedImportance = TaskImportance.basic;
   bool _isDeadlineEnabled = false;
@@ -21,6 +26,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
   @override
   void initState() {
     super.initState();
+    notifier = ref.read(taskProvider.notifier);
     final task = widget.task;
     if (task != null) {
       textEditingController.text = task.text;
@@ -66,7 +72,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
         Padding(
           padding: const EdgeInsets.only(right: 12.0),
           child: TextButton(
-            onPressed: _saveTask,
+            onPressed: _saveOrUpdateTask,
             child: Text(
               context.localizations.save,
               style: context.textTheme.labelMedium!
@@ -169,9 +175,10 @@ class _TaskFormPageState extends State<TaskFormPage> {
             final selectedDate = await showDatePicker(
               context: context,
               locale: const Locale("ru"),
+              confirmText: context.localizations.done,
               initialDate: DateTime.now(),
-              firstDate: DateTime(1960),
-              lastDate: DateTime(2100),
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now().add(const Duration(days: 365)),
             );
             if (selectedDate != null) {
               setState(() {
@@ -195,7 +202,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
       children: [
         IconButton(
           splashRadius: 20,
-          onPressed: widget.task == null ? null : _deleteTask,
+          onPressed: widget.task == null ? null : deleteTask,
           icon: Icon(
             Icons.delete,
             color: widget.task == null
@@ -218,15 +225,37 @@ class _TaskFormPageState extends State<TaskFormPage> {
   Widget? _buildFormatedDate(BuildContext context) {
     if (_selectedDeadline == null) return null;
     return Text(
-      _selectedDeadline.toString(),
+      DateFormat('dd MMMM yyyy', 'ru').format(_selectedDeadline!),
       style: context.textTheme.bodySmall!
           .copyWith(color: context.customColors.blue),
     );
   }
 
-  void _saveTask() {}
+  void deleteTask() {
+    notifier.deleteTask(widget.task!);
+    Navigator.pop(context);
+  }
 
-  void _deleteTask() {}
+  void _saveOrUpdateTask() {
+    final text = textEditingController.text.trim();
+    if (text.isEmpty) return;
+
+    final newTask = Task(
+      id: widget.task?.id ?? const Uuid().v4(),
+      text: text,
+      importance: _selectedImportance,
+      deadline: _selectedDeadline,
+      done: widget.task?.done ?? false,
+      createdAt: widget.task?.createdAt ?? DateTime.now(),
+      changedAt: DateTime.now(),
+      lastUpdatedBy: 'user',
+    );
+
+    widget.task == null
+        ? notifier.saveTask(newTask)
+        : notifier.updateTask(newTask);
+    Navigator.pop(context);
+  }
 
   @override
   void dispose() {

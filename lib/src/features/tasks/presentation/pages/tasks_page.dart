@@ -11,27 +11,26 @@ class TodoListPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tasksAsyncValue = ref.watch(tasksProvider);
+    final state = ref.watch(taskProvider);
+    final notifier = ref.watch(taskProvider.notifier);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverPersistentHeader(
             pinned: true,
             floating: true,
-            delegate: HeaderDelegate(),
+            delegate: HeaderDelegate(
+                isVisible: state.isCompletedVisible,
+                completedTasksCount: notifier.getCompletedTaskCount(),
+                onToggleVisibility: () {
+                  notifier.toggleCompletedVisibility();
+                }),
           ),
           SliverToBoxAdapter(
-            child: tasksAsyncValue.when(
-                data: (tasks) => TaskList(
-                      tasks: tasks,
-                    ),
-                loading: () =>  const Center(child: CircularProgressIndicator()),
-                error: (err, stack) {
-                  return Center(
-                      child: Text(
-                    'Error: $stack',
-                  ));
-                }),
+            child: TaskList(
+              tasks: state.tasks,
+              isVisible: state.isCompletedVisible,
+            ),
           ),
         ],
       ),
@@ -39,9 +38,7 @@ class TodoListPage extends ConsumerWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const TaskFormPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const TaskFormPage()),
           );
         },
         shape: const CircleBorder(),

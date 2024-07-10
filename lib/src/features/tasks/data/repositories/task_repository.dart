@@ -16,14 +16,15 @@ class TaskRepository {
   });
 
   Future<List<Task>> getTasks() async {
-    var connectionResult = await connectivity.checkConnectivity();
+    final connectionResult = await connectivity.checkConnectivity();
     if (connectionResult == ConnectivityResult.none) {
       return localDataSource.getTasks();
     } else {
       try {
-        final tasks = await remoteDataSource.getTasks();
-        localDataSource.saveTasks(tasks);
-        return tasks;
+        final taskResponse = await remoteDataSource.getTasks();
+        localDataSource.saveTasks(taskResponse.tasks);
+        localDataSource.saveRevision(taskResponse.revision);
+        return taskResponse.tasks;
       } catch (e) {
         return localDataSource.getTasks();
       }
@@ -32,51 +33,45 @@ class TaskRepository {
 
   Future<void> saveTask(Task task) async {
     int revision = localDataSource.getRevision();
-    var connectionResult = await connectivity.checkConnectivity();
+    final connectionResult = await connectivity.checkConnectivity();
     if (connectionResult == ConnectivityResult.none) {
       localDataSource.saveTask(task);
-      localDataSource.saveRevision(++revision);
     } else {
       try {
         await remoteDataSource.saveTask(task, revision);
         localDataSource.saveRevision(++revision);
       } catch (e) {
         localDataSource.saveTask(task);
-        localDataSource.saveRevision(++revision);
       }
     }
   }
 
   Future<void> updateTask(Task task) async {
     int revision = localDataSource.getRevision();
-    var connectionResult = await connectivity.checkConnectivity();
+    final connectionResult = await connectivity.checkConnectivity();
     if (connectionResult == ConnectivityResult.none) {
       localDataSource.updateTask(task);
-      localDataSource.saveRevision(++revision);
     } else {
       try {
         await remoteDataSource.updateTask(task, revision);
         localDataSource.saveRevision(++revision);
       } catch (e) {
         localDataSource.updateTask(task);
-        localDataSource.saveRevision(++revision);
       }
     }
   }
 
   Future<void> deleteTask(String id) async {
     int revision = localDataSource.getRevision();
-    var connectionResult = await connectivity.checkConnectivity();
+    final connectionResult = await connectivity.checkConnectivity();
     if (connectionResult == ConnectivityResult.none) {
       localDataSource.deleteTask(id);
-      localDataSource.saveRevision(++revision);
     } else {
       try {
         await remoteDataSource.deleteTask(id, revision);
-        localDataSource.saveRevision(++revision);
+        await localDataSource.saveRevision(++revision);
       } catch (e) {
         localDataSource.deleteTask(id);
-        localDataSource.saveRevision(++revision);
       }
     }
   }
