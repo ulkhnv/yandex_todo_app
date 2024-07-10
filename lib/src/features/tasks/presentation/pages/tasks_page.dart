@@ -1,32 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../domain/entities/entities.dart';
+import '../../providers/task_provider.dart';
 import '../widgets/widgets.dart';
 import '/src/core/utils/utils.dart';
 import 'pages.dart';
 
-class TodoListPage extends StatelessWidget {
+class TodoListPage extends ConsumerWidget {
   const TodoListPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final tasks = <Task>[
-      Task(id: "1", text: "Пресс качат", importance: TaskImportance.basic, done: true, ),
-      Task(id: "2", text: "Бегит", importance: TaskImportance.low, done: false),
-      Task(id: "3", text: "Анжуманя", importance: TaskImportance.important, done: false),
-
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(taskProvider);
+    final notifier = ref.watch(taskProvider.notifier);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
           SliverPersistentHeader(
             pinned: true,
             floating: true,
-            delegate: HeaderDelegate(),
+            delegate: HeaderDelegate(
+                isVisible: state.isCompletedVisible,
+                completedTasksCount: notifier.getCompletedTaskCount(),
+                onToggleVisibility: () {
+                  notifier.toggleCompletedVisibility();
+                }),
           ),
           SliverToBoxAdapter(
             child: TaskList(
-              tasks: tasks,
+              tasks: state.tasks,
+              isVisible: state.isCompletedVisible,
             ),
           ),
         ],
@@ -35,9 +38,7 @@ class TodoListPage extends StatelessWidget {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const TaskFormPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const TaskFormPage()),
           );
         },
         shape: const CircleBorder(),

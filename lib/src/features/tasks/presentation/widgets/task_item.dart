@@ -1,24 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
-import '../../domain/entities/entities.dart';
+import '../../data/models/models.dart';
+import '../../providers/providers.dart';
 import '../pages/pages.dart';
 import '/src/core/utils/utils.dart';
 
-class TaskItem extends StatelessWidget {
+class TaskItem extends ConsumerWidget {
   final Task task;
 
   const TaskItem({super.key, required this.task});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(taskProvider.notifier);
+
     return Dismissible(
-      key: Key(task.id),
+      key: UniqueKey(),
+      direction:
+          task.done ? DismissDirection.endToStart : DismissDirection.horizontal,
       background: _buildBackgroundContainer(context, true),
       secondaryBackground: _buildBackgroundContainer(context, false),
+      onDismissed: (direction) {
+        if (direction == DismissDirection.startToEnd) {
+          notifier.markTaskAsDone(task);
+        } else if (direction == DismissDirection.endToStart) {
+          notifier.deleteTask(task);
+        }
+      },
       child: ListTile(
         contentPadding: const EdgeInsets.only(right: 10),
         horizontalTitleGap: 0,
-        leading: _buildLeading(context),
+        leading: _buildLeading(context, notifier),
         title: _buildTitle(context),
         trailing: _buildTrailing(context),
       ),
@@ -43,25 +57,12 @@ class TaskItem extends StatelessWidget {
     );
   }
 
-  Widget _buildLeading(BuildContext context) {
+  Widget _buildLeading(BuildContext context, TaskNotifier notifier) {
     return Checkbox(
       value: task.done,
       activeColor: context.customColors.green,
-      fillColor: MaterialStateProperty.resolveWith((Set<MaterialState> states) {
-        if (states.contains(MaterialState.selected)) {
-          return context.customColors.green;
-        }
-        return task.importance == TaskImportance.important
-            ? context.customColors.red.withOpacity(0.16)
-            : Colors.transparent;
-      }),
-      side: BorderSide(
-        width: 2,
-        color: task.importance == TaskImportance.important
-            ? context.customColors.red
-            : context.customColors.separator,
-      ),
       onChanged: (value) {
+        notifier.markTaskAsDone(task);
       },
     );
   }
@@ -69,6 +70,7 @@ class TaskItem extends StatelessWidget {
   Widget _buildTitle(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (task.importance == TaskImportance.important)
           Icon(
@@ -80,16 +82,29 @@ class TaskItem extends StatelessWidget {
             Icons.arrow_downward_rounded,
             color: context.customColors.grey,
           ),
-        Text(
-          task.text,
-          style: task.done
-              ? context.textTheme.bodyMedium!.copyWith(
-                  color: context.colorScheme.tertiary,
-                  decoration: TextDecoration.lineThrough,
-                )
-              : context.textTheme.bodyMedium,
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                task.text,
+                style: task.done
+                    ? context.textTheme.bodyMedium!.copyWith(
+                        color: context.colorScheme.tertiary,
+                        decoration: TextDecoration.lineThrough,
+                      )
+                    : context.textTheme.bodyMedium,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              task.deadline != null
+                  ? Text(
+                      DateFormat('dd MMMM yyyy', 'ru').format(task.deadline!),
+                      style: context.textTheme.bodySmall,
+                    )
+                  : const SizedBox.shrink(),
+            ],
+          ),
         ),
       ],
     );

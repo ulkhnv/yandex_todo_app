@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:yandex_todo_app/src/features/tasks/domain/entities/task.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:uuid/uuid.dart';
 
-import '../../domain/entities/entities.dart';
+import '../../data/models/models.dart';
+import '../../providers/providers.dart';
 import '/src/core/utils/utils.dart';
 
-class TaskFormPage extends StatefulWidget {
+class TaskFormPage extends ConsumerStatefulWidget {
   final Task? task;
 
   const TaskFormPage({super.key, this.task});
 
   @override
-  State<TaskFormPage> createState() => _TaskFormPageState();
+  ConsumerState<TaskFormPage> createState() => _TaskFormPageState();
 }
 
-class _TaskFormPageState extends State<TaskFormPage> {
+class _TaskFormPageState extends ConsumerState<TaskFormPage> {
+  late TaskNotifier notifier;
   final textEditingController = TextEditingController();
   TaskImportance _selectedImportance = TaskImportance.basic;
   bool _isDeadlineEnabled = false;
@@ -22,6 +26,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
   @override
   void initState() {
     super.initState();
+    notifier = ref.read(taskProvider.notifier);
     final task = widget.task;
     if (task != null) {
       textEditingController.text = task.text;
@@ -67,9 +72,9 @@ class _TaskFormPageState extends State<TaskFormPage> {
         Padding(
           padding: const EdgeInsets.only(right: 12.0),
           child: TextButton(
-            onPressed: _saveTask,
+            onPressed: _saveOrUpdateTask,
             child: Text(
-              "Сохранить",
+              context.localizations.save,
               style: context.textTheme.labelMedium!
                   .copyWith(color: context.customColors.blue),
             ),
@@ -93,7 +98,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
           style: context.textTheme.bodyMedium,
           controller: textEditingController,
           decoration: InputDecoration(
-            hintText: "Что надо сделать...",
+            hintText: context.localizations.formHintText,
             hintStyle: context.textTheme.bodyMedium!
                 .copyWith(color: context.colorScheme.tertiary),
             enabledBorder: OutlineInputBorder(
@@ -120,11 +125,11 @@ class _TaskFormPageState extends State<TaskFormPage> {
         child: ListTile(
           contentPadding: EdgeInsets.zero,
           title: Text(
-            "Важность",
+            context.localizations.importanceTitle,
             style: context.textTheme.bodyMedium,
           ),
           subtitle: Text(
-            _selectedImportance.name,
+            context.localizations.importance(_selectedImportance.name),
             style: context.textTheme.bodySmall,
           ),
         ),
@@ -137,7 +142,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
             .map((importance) => PopupMenuItem<TaskImportance>(
                   value: importance,
                   child: Text(
-                    importance.name,
+                    context.localizations.importance(importance.name),
                     style: context.textTheme.bodyMedium!.copyWith(
                       color: importance == TaskImportance.important
                           ? context.customColors.red
@@ -156,7 +161,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
       child: SwitchListTile(
         contentPadding: EdgeInsets.zero,
         title: Text(
-          "Сделать до",
+          context.localizations.deadlineTitle,
           style: context.textTheme.bodyMedium,
         ),
         subtitle: _buildFormatedDate(context),
@@ -169,9 +174,11 @@ class _TaskFormPageState extends State<TaskFormPage> {
           if (newValue) {
             final selectedDate = await showDatePicker(
               context: context,
+              locale: const Locale("ru"),
+              confirmText: context.localizations.done,
               initialDate: DateTime.now(),
-              firstDate: DateTime(1960),
-              lastDate: DateTime(2100),
+              firstDate: DateTime.now(),
+              lastDate: DateTime.now().add(const Duration(days: 365)),
             );
             if (selectedDate != null) {
               setState(() {
@@ -195,7 +202,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
       children: [
         IconButton(
           splashRadius: 20,
-          onPressed: widget.task == null ? null : _deleteTask,
+          onPressed: widget.task == null ? null : deleteTask,
           icon: Icon(
             Icons.delete,
             color: widget.task == null
@@ -204,7 +211,7 @@ class _TaskFormPageState extends State<TaskFormPage> {
           ),
         ),
         Text(
-          "Удалить",
+          context.localizations.delete,
           style: context.textTheme.bodyMedium!.copyWith(
             color: widget.task == null
                 ? context.customColors.disable
@@ -218,15 +225,37 @@ class _TaskFormPageState extends State<TaskFormPage> {
   Widget? _buildFormatedDate(BuildContext context) {
     if (_selectedDeadline == null) return null;
     return Text(
-      _selectedDeadline.toString(),
+      DateFormat('dd MMMM yyyy', 'ru').format(_selectedDeadline!),
       style: context.textTheme.bodySmall!
           .copyWith(color: context.customColors.blue),
     );
   }
 
-  void _saveTask() {}
+  void deleteTask() {
+    notifier.deleteTask(widget.task!);
+    Navigator.pop(context);
+  }
 
-  void _deleteTask() {}
+  void _saveOrUpdateTask() {
+    final text = textEditingController.text.trim();
+    if (text.isEmpty) return;
+
+    final newTask = Task(
+      id: widget.task?.id ?? const Uuid().v4(),
+      text: text,
+      importance: _selectedImportance,
+      deadline: _selectedDeadline,
+      done: widget.task?.done ?? false,
+      createdAt: widget.task?.createdAt ?? DateTime.now(),
+      changedAt: DateTime.now(),
+      lastUpdatedBy: 'user',
+    );
+
+    widget.task == null
+        ? notifier.saveTask(newTask)
+        : notifier.updateTask(newTask);
+    Navigator.pop(context);
+  }
 
   @override
   void dispose() {

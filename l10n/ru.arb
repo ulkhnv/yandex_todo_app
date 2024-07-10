@@ -1,0 +1,26 @@
+{
+  "@@locale": "ru",
+  "taskTitle": "Мои дела",
+  "taskSubtitle": "Выполнено — {count}",
+  "@@taskSubtitle": {
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "1"
+      }
+    }
+  },
+  "newTask": "Новое",
+  "save": "Сохранить",
+  "formHintText": "Что надо сделать...",
+  "importanceTitle": "Важность",
+  "importance": "{value,select, basic {Нет} low {Низкая} important {!!Высокая} other {Нет}}",
+  "@importance": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "deadlineTitle": "Сделать до",
+  "done": "ГОТОВО",
+  "delete": "Удалить"
+}
