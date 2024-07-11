@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:yandex_todo_app/src/core/routes/routes.dart';
 
 import '../../providers/task_provider.dart';
 import '../widgets/widgets.dart';
 import '/src/core/utils/utils.dart';
-import 'pages.dart';
 
-class TodoListPage extends ConsumerWidget {
-  const TodoListPage({super.key});
+class TaskPage extends ConsumerWidget {
+  const TaskPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,20 +27,22 @@ class TodoListPage extends ConsumerWidget {
                   notifier.toggleCompletedVisibility();
                 }),
           ),
-          SliverToBoxAdapter(
-            child: TaskList(
-              tasks: state.tasks,
-              isVisible: state.isCompletedVisible,
-            ),
-          ),
+          state.isLoading
+              ? const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(child: CircularProgressIndicator()),
+                )
+              : SliverToBoxAdapter(
+                  child: TaskList(
+                    tasks: state.tasks,
+                    isVisible: state.isCompletedVisible,
+                  ),
+                ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const TaskFormPage()),
-          );
+          context.push(RouteLocation.taskForm);
         },
         shape: const CircleBorder(),
         child: Icon(

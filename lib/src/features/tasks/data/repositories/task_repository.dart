@@ -5,73 +5,87 @@ import '../datasources/task_remote_data_source.dart';
 import '../models/models.dart';
 
 class TaskRepository {
-  final TaskRemoteDataSource remoteDataSource;
-  final TaskLocalDataSource localDataSource;
-  final Connectivity connectivity;
+  final TaskRemoteDataSource _remoteDataSource;
+  final TaskLocalDataSource _localDataSource;
+  final Connectivity _connectivity;
 
   TaskRepository({
-    required this.remoteDataSource,
-    required this.localDataSource,
-    required this.connectivity,
-  });
+    required TaskRemoteDataSource remoteDataSource,
+    required TaskLocalDataSource localDataSource,
+    required Connectivity connectivity,
+  })  : _connectivity = connectivity,
+        _localDataSource = localDataSource,
+        _remoteDataSource = remoteDataSource;
 
   Future<List<Task>> getTasks() async {
-    final connectionResult = await connectivity.checkConnectivity();
+    final connectionResult = await _connectivity.checkConnectivity();
     if (connectionResult == ConnectivityResult.none) {
-      return localDataSource.getTasks();
+      return await _localDataSource.getTasks();
     } else {
       try {
-        final taskResponse = await remoteDataSource.getTasks();
-        localDataSource.saveTasks(taskResponse.tasks);
-        localDataSource.saveRevision(taskResponse.revision);
+        final taskResponse = await _remoteDataSource.getTasks();
+        if (!_localDataSource.isSynchronized()) {
+          final tasks = await _localDataSource.getTasks();
+          await _remoteDataSource.patch(tasks, taskResponse.revision);
+          await _localDataSource.setSynchronized(true);
+          return tasks;
+        }
+        await _localDataSource.saveTasks(taskResponse.tasks);
+        await _localDataSource.saveRevision(taskResponse.revision);
         return taskResponse.tasks;
       } catch (e) {
-        return localDataSource.getTasks();
+        return _localDataSource.getTasks();
       }
     }
   }
 
   Future<void> saveTask(Task task) async {
-    int revision = localDataSource.getRevision();
-    final connectionResult = await connectivity.checkConnectivity();
+    int revision = _localDataSource.getRevision();
+    final connectionResult = await _connectivity.checkConnectivity();
     if (connectionResult == ConnectivityResult.none) {
-      localDataSource.saveTask(task);
+      await _localDataSource.saveTask(task);
+      await _localDataSource.setSynchronized(false);
     } else {
       try {
-        await remoteDataSource.saveTask(task, revision);
-        localDataSource.saveRevision(++revision);
+        await _remoteDataSource.saveTask(task, revision);
+        await _localDataSource.saveRevision(++revision);
       } catch (e) {
-        localDataSource.saveTask(task);
+        await _localDataSource.saveTask(task);
+        await _localDataSource.setSynchronized(false);
       }
     }
   }
 
   Future<void> updateTask(Task task) async {
-    int revision = localDataSource.getRevision();
-    final connectionResult = await connectivity.checkConnectivity();
+    int revision = _localDataSource.getRevision();
+    final connectionResult = await _connectivity.checkConnectivity();
     if (connectionResult == ConnectivityResult.none) {
-      localDataSource.updateTask(task);
+      await _localDataSource.updateTask(task);
+      await _localDataSource.setSynchronized(false);
     } else {
       try {
-        await remoteDataSource.updateTask(task, revision);
-        localDataSource.saveRevision(++revision);
+        await _remoteDataSource.updateTask(task, revision);
+        await _localDataSource.saveRevision(++revision);
       } catch (e) {
-        localDataSource.updateTask(task);
+        await _localDataSource.updateTask(task);
+        await _localDataSource.setSynchronized(false);
       }
     }
   }
 
   Future<void> deleteTask(String id) async {
-    int revision = localDataSource.getRevision();
-    final connectionResult = await connectivity.checkConnectivity();
+    int revision = _localDataSource.getRevision();
+    final connectionResult = await _connectivity.checkConnectivity();
     if (connectionResult == ConnectivityResult.none) {
-      localDataSource.deleteTask(id);
+      await _localDataSource.deleteTask(id);
+      await _localDataSource.setSynchronized(false);
     } else {
       try {
-        await remoteDataSource.deleteTask(id, revision);
-        await localDataSource.saveRevision(++revision);
+        await _remoteDataSource.deleteTask(id, revision);
+        await _localDataSource.saveRevision(++revision);
       } catch (e) {
-        localDataSource.deleteTask(id);
+        await _localDataSource.deleteTask(id);
+        await _localDataSource.setSynchronized(false);
       }
     }
   }

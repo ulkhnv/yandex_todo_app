@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/routes/routes.dart';
 import '../../data/models/models.dart';
-import '../pages/pages.dart';
 import '/src/core/utils/utils.dart';
 import 'widgets.dart';
 
@@ -13,7 +14,8 @@ class TaskList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visibleTasks = isVisible ? tasks : tasks.where((task) => !task.done).toList();
+    final visibleTasks =
+        isVisible ? tasks : tasks.where((task) => !task.done).toList();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
       child: Container(
@@ -25,27 +27,30 @@ class TaskList extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 10),
-            ListView.builder(
-              padding: EdgeInsets.zero,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (context, index) {
-                return TaskItem(
-                  task: visibleTasks[index],
-                );
-              },
-              itemCount: visibleTasks.length,
-            ),
+            visibleTasks.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.only(left: 48.0, top: 10),
+                    child: Text(
+                      context.localizations.noTasks,
+                      style: context.textTheme.titleMedium,
+                    ),
+                  )
+                : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return TaskItem(
+                        task: visibleTasks[index],
+                      );
+                    },
+                    itemCount: visibleTasks.length,
+                  ),
             Padding(
               padding: const EdgeInsets.only(left: 40.0),
               child: TextButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const TaskFormPage(),
-                    ),
-                  );
+                  context.push(RouteLocation.taskForm);
                 },
                 child: Text(
                   context.localizations.newTask,

@@ -1,4 +1,4 @@
-import 'models.dart';
+import '../models/models.dart';
 
 class TaskResponse {
   final List<Task> tasks;

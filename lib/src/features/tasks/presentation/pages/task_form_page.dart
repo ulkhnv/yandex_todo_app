@@ -164,7 +164,7 @@ class _TaskFormPageState extends ConsumerState<TaskFormPage> {
           context.localizations.deadlineTitle,
           style: context.textTheme.bodyMedium,
         ),
-        subtitle: _buildFormatedDate(context),
+        subtitle: _buildFormattedDate(context),
         activeTrackColor: context.customColors.blue.withOpacity(0.3),
         activeColor: context.customColors.blue,
         inactiveTrackColor: context.customColors.overlay,
@@ -222,7 +222,7 @@ class _TaskFormPageState extends ConsumerState<TaskFormPage> {
     );
   }
 
-  Widget? _buildFormatedDate(BuildContext context) {
+  Widget? _buildFormattedDate(BuildContext context) {
     if (_selectedDeadline == null) return null;
     return Text(
       DateFormat('dd MMMM yyyy', 'ru').format(_selectedDeadline!),
