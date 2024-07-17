@@ -12,12 +12,8 @@ class TaskNotifier extends StateNotifier<TaskState> {
   }
 
   void fetchTasks() async {
-    try {
-      final tasks = await _taskRepository.getTasks();
-      state = state.copyWith(tasks: tasks, isLoading: false);
-    } catch (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
-    }
+    final tasks = await _taskRepository.getTasks();
+    state = state.copyWith(tasks: tasks, isLoading: false);
   }
 
   int getCompletedTaskCount() {

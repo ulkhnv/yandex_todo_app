@@ -5,15 +5,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/task.dart';
 
 class TaskLocalDataSource {
-  final SharedPreferences sharedPreferences;
+  final SharedPreferences _sharedPreferences;
 
-  TaskLocalDataSource(this.sharedPreferences);
+  TaskLocalDataSource(this._sharedPreferences);
 
   static const String tasksKey = 'tasks';
   static const String revisionKey = 'revision';
+  static const String synchronizedKey = 'synchronized';
 
   Future<List<Task>> getTasks() async {
-    final tasksJson = sharedPreferences.getStringList(tasksKey);
+    final tasksJson = _sharedPreferences.getStringList(tasksKey);
     if (tasksJson == null) {
       return [];
     }
@@ -24,7 +25,7 @@ class TaskLocalDataSource {
 
   Future<void> saveTasks(List<Task> tasks) async {
     final tasksJson = tasks.map((task) => jsonEncode(task.toJson())).toList();
-    await sharedPreferences.setStringList(tasksKey, tasksJson);
+    await _sharedPreferences.setStringList(tasksKey, tasksJson);
   }
 
   Future<void> saveTask(Task task) async {
@@ -49,10 +50,18 @@ class TaskLocalDataSource {
   }
 
   int getRevision() {
-    return sharedPreferences.getInt(revisionKey) ?? 0;
+    return _sharedPreferences.getInt(revisionKey) ?? 0;
   }
 
   Future<void> saveRevision(int revision) async {
-    await sharedPreferences.setInt(revisionKey, revision);
+    await _sharedPreferences.setInt(revisionKey, revision);
+  }
+
+  bool isSynchronized() {
+    return _sharedPreferences.getBool(synchronizedKey) ?? true;
+  }
+
+  Future<void> setSynchronized(bool isSynchronized) async {
+    await _sharedPreferences.setBool(synchronizedKey, isSynchronized);
   }
 }

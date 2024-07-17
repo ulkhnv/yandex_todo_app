@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../dto/dto.dart';
 import '../models/models.dart';
-import '../models/task_response.dart';
 
 class TaskRemoteDataSource {
   final Dio _dio;
@@ -25,8 +25,10 @@ class TaskRemoteDataSource {
           jsonTasks.map((taskJson) => Task.fromJson(taskJson)).toList();
       final revision = response.data['revision'];
       return TaskResponse(tasks: tasks, revision: revision);
+    } on DioException catch (e) {
+      return Future.error(_handleDioException(e));
     } catch (e) {
-      throw Exception('Failed to load tasks: $e');
+      return Future.error(_handleGenericError(e));
     }
   }
 
@@ -38,8 +40,10 @@ class TaskRemoteDataSource {
       );
       final task = Task.fromJson(response.data['element']);
       return task;
+    } on DioException catch (e) {
+      return Future.error(_handleDioException(e));
     } catch (e) {
-      throw Exception('Failed to load task: $e');
+      return Future.error(_handleGenericError(e));
     }
   }
 
@@ -47,7 +51,7 @@ class TaskRemoteDataSource {
     try {
       await _dio.patch(
         baseUrl,
-        data: tasks.map((task) => task.toJson()).toList(),
+        data: {'list': tasks.map((task) => task.toJson()).toList()},
         options: Options(
           headers: {
             ...headers,
@@ -55,8 +59,10 @@ class TaskRemoteDataSource {
           },
         ),
       );
+    } on DioException catch (e) {
+      return Future.error(_handleDioException(e));
     } catch (e) {
-      throw Exception('Failed to patch tasks: $e');
+      return Future.error(_handleGenericError(e));
     }
   }
 
@@ -74,8 +80,10 @@ class TaskRemoteDataSource {
           },
         ),
       );
+    } on DioException catch (e) {
+      return Future.error(_handleDioException(e));
     } catch (e) {
-      throw Exception('Failed to save task: $e');
+      return Future.error(_handleGenericError(e));
     }
   }
 
@@ -95,8 +103,10 @@ class TaskRemoteDataSource {
       );
       final updatedTask = Task.fromJson(response.data['element']);
       return updatedTask;
+    } on DioException catch (e) {
+      return Future.error(_handleDioException(e));
     } catch (e) {
-      throw Exception('Failed to update task: $e');
+      return Future.error(_handleGenericError(e));
     }
   }
 
@@ -113,8 +123,23 @@ class TaskRemoteDataSource {
       );
       final deletedTask = Task.fromJson(response.data['element']);
       return deletedTask;
+    } on DioException catch (e) {
+      return Future.error(_handleDioException(e));
     } catch (e) {
-      throw Exception('Failed to delete task: $e');
+      return Future.error(_handleGenericError(e));
     }
+  }
+
+  Exception _handleDioException(DioException exception) {
+    if (exception.response != null) {
+      return Exception('Server Error: ${exception.response?.statusCode} '
+          '${exception.response?.statusMessage}');
+    } else {
+      return Exception('Network Error: ${exception.message}');
+    }
+  }
+
+  Exception _handleGenericError(dynamic error) {
+    return Exception('Unexpected Error: $error');
   }
 }
