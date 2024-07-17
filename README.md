@@ -30,3 +30,4 @@ Deeplinks
 ![image] (https://github.com/ulkhnv/yandex_todo_app/blob/master/assets/Screenshot_20240711_035711.png)
 ![image] (https://github.com/ulkhnv/yandex_todo_app/blob/master/assets/Screenshot_20240711_040012.png)
 ![image] (https://github.com/ulkhnv/yandex_todo_app/blob/master/assets/Screenshot_20240711_040047.png)
+
